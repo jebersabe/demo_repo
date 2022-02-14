@@ -111,16 +111,16 @@ def delete_tag(tag_name, include_remote=False):
 
 
 def main(args):
-    if args.action == 'create_branch':
+    if args.command == 'branch' and args.action == 'create':
         print(f'Creating branch {args.to_} based on {args.from_}')
         create_branch(args.from_, args.to_, push_remote=args.remote)
-    elif args.action == 'delete_branch':
+    elif args.command == 'branch' and args.action == 'delete':
         print(f'Deleting branch {args.from_}')
         delete_branch(args.from_, include_remote=args.remote)
-    elif args.action == 'create_tag':
+    elif args.command == 'tag' and args.action == 'create':
         print(f'Creating tag {args.tag} on {args.from_}')
         create_tag(args.from_, args.tag, push_remote=args.remote)
-    elif args.action == 'delete_tag':
+    elif args.command == 'tag' and args.action == 'delete':
         print(f'Deleting tag {args.tag} on {args.from_}')
         delete_tag(args.tag, include_remote=args.remote)
     print('Done.')
@@ -130,33 +130,54 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=[
-        'create_branch',
-        'delete_branch',
-        'create_tag',
-        'delete_tag',
+    subparsers = parser.add_subparsers(help='sub-command help', required=True, dest='command')
+    ############################################################################
+    parser_branch = subparsers.add_parser('branch', help='Create/delete branch')
+
+    parser_branch.add_argument('action', choices=[
+        'create',
+        'delete',
     ])
-    parser.add_argument(
+
+    parser_branch.add_argument(
         '--remote', '-R',
         help='Include or push to remote.',
         action='store_true',
         default=False
     )
-    parser.add_argument(
+    parser_branch.add_argument(
         '--from', '-f',
         dest='from_',
         help='From branch or reference branch when deleting'
     )
-    parser.add_argument(
+    parser_branch.add_argument(
         '--to', '-t',
         dest='to_',
         help='To or new branch when creating'
     )
+    ############################################################################
+    parser_tag = subparsers.add_parser('tag', help='Create/delete tag')
+    parser_tag.add_argument('action', choices=[
+        'create',
+        'delete',
+    ])
 
-    parser.add_argument(
+    parser_tag.add_argument(
         '--tag',
         dest='tag',
         help='Tag to create or delete'
+    )
+    parser_tag.add_argument(
+        '--from', '-f',
+        dest='from_',
+        help='From branch or reference branch when deleting'
+    )
+
+    parser_tag.add_argument(
+        '--remote', '-R',
+        help='Include or push to remote.',
+        action='store_true',
+        default=False
     )
 
     args = parser.parse_args()
